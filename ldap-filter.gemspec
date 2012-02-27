@@ -4,7 +4,7 @@ require "ldap-filter/version"
 
 Gem::Specification.new do |s|
   s.name        = "ldap-filter"
-  s.version     = Ldap::Filter::VERSION
+  s.version     = LDAP::Filter::VERSION
   s.authors     = ["Eduardo Gutierrez"]
   s.email       = ["edd_d@mit.edu"]
   s.homepage    = ""

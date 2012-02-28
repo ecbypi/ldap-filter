@@ -19,6 +19,33 @@ module LDAP
         end
       end
 
+      describe "compound methods" do
+        let(:other) { Base.new(:sn, 'Smith') }
+
+        describe "#<<" do
+          it "creates an OrFilter object under the same key" do
+            compound = filter << 'Smith'
+            compound.should be_a OrFilter
+            compound.to_s.should eq '(|(givenName=John)(givenName=Smith))'
+          end
+        end
+
+        describe "#|" do
+          it "builds an OrFilter of itself and the argument filter" do
+            compound = filter | other
+            compound.should be_a OrFilter
+            compound.to_s.should eq '(|(givenName=John)(sn=Smith))'
+          end
+        end
+
+        describe "#&" do
+          it "builds an AndFilter of itself and the argument filter" do
+            compound = filter & other
+            compound.should be_a AndFilter
+            compound.to_s.should eq '(&(givenName=John)(sn=Smith))'
+          end
+        end
+      end
     end
   end
 end

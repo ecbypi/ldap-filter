@@ -21,6 +21,18 @@ module LDAP
         self
       end
 
+      def << value
+        OrFilter.new @key, @value, value
+      end
+
+      def | filter
+        OrFilter.new [self, filter]
+      end
+
+      def & filter
+        AndFilter.new [self, filter]
+      end
+
       private
 
       def condition

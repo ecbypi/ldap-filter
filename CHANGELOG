@@ -1,0 +1,6 @@
+0.0.2 (Feb 29, 2012)
+  Fix CompoundFilter to understand non-splat arrays
+
+
+0.0.1 (Feb 27, 2012)
+  Initial Release

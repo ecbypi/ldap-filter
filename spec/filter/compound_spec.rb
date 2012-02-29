@@ -47,6 +47,12 @@ module LDAP
           filter.children.size.should eq 3
         end
 
+        it "can figure out if an array is passed in instead of a splat" do
+          values = ['Mary', 'John', 'Tyler']
+          filter = Compound.new(operator, :givenName, values)
+          filter.children.size.should eq 3
+        end
+
         it "so long as there is more than one value provided" do
           expect { Compound.new('|', :givenName, 'Mary') }.to raise_error ArgumentError
         end

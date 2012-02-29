@@ -55,7 +55,8 @@ module LDAP
       end
 
       def populate_from_values key, values
-        raise ArgumentError, 'need more than one value for compound filter on the same key' if values.size < 2
+        values = values.flatten
+        raise ArgumentError, "need more than one value for compound filter on the same key: #{key.inspect}, #{values.inspect}" if values.size < 2
         @operator = '|' # Cannot &'d values on the same key
         values.map { |value| Base.new(key, value) }
       end

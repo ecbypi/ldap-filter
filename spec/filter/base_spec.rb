@@ -46,6 +46,27 @@ module LDAP
           end
         end
       end
+
+      describe "uses options to place wildcards" do
+        it "after the value" do
+          filter = Base.new :sn, 'Smith', wildcard: :right
+          filter.to_s.should eq '(sn=Smith*)'
+        end
+
+        it "before the value" do
+          filter = Base.new :sn, 'Smith', wildcard: :left
+          filter.to_s.should eq '(sn=*Smith)'
+        end
+
+        it "inbetween pieces of the string" do
+          filter = Base.new :cn, 'John Smith', wildcard: :inside
+          filter.to_s.should eq '(cn=John*Smith)'
+        end
+
+        it "around the value using :left and :right options" do
+          filter = Base.new :sn, 'Smith', wildcard: [:left, :right]
+        end
+      end
     end
   end
 end

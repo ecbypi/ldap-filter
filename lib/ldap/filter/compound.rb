@@ -46,10 +46,11 @@ module LDAP
 
       def populate_from_hash mappings
         raise ArgumentError, 'compound filters require more than one key' if mappings.keys.size < 2
-        mappings.map do |key, values|
-          case values
-          when Array then Compound.new('|', key, *values)
-          else Base.new(key, values)
+        mappings.map do |key, values_or_options|
+          case values_or_options
+          when Array then Compound.new('|', key, *values_or_options)
+          when Hash then Base.new(key, values_or_options.delete(:value), values_or_options)
+          else Base.new(key, values_or_options)
           end
         end
       end

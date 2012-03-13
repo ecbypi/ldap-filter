@@ -38,6 +38,16 @@ module LDAP
         it "so long as more than one key is supplied" do
           expect { Compound.new('|', { givenName: 'John' }) }.to raise_error ArgumentError
         end
+
+        it "with options for the base filter" do
+          attributes = {
+            givenName: { value: 'Jo', wildcard: :right },
+            cn: { value: 'John Smith', wildcard: :inside }
+          }
+
+          filter = Compound.new(operator, attributes)
+          filter.to_s.should eq '(&(givenName=Jo*)(cn=John*Smith))'
+        end
       end
 
       describe "can be built from an array of string values" do

@@ -1,34 +1,89 @@
 # ldap-filter
 
-While working on a Rails application that leaned heavily on my school's LDAP server, I started off writing inflexible methods like:
+Instead of manually building LDAP filters with strings:
 
-    def uid_filter(uid)
-      "(uid=#{uid})"
-    end
+```ruby
+def uid_filter(uid)
+  "(uid=#{uid})"
+end
 
-    def uid_or_email_filter(uid, email)
-      "(|(#{uid_filter(uid)})(#{email_filter(email)}))"
-    end
+def uid_or_email_filter(uid, email)
+  "(|(#{uid_filter(uid)})(#{email_filter(email)}))"
+end
+```
 
-And decided it would be easier to do:
+Construct them in a more fluent way.
 
-    filter = LDAP::Filter::Base.new :uid, 'mrhalp' # (uid=mrhalp)
-    if search[:email] # mrhalp@email.org
-      email = LDAP::Filter::Base.new :mail, search[:email]
-      filter = filter | email
-    end
-    MyLDAPLibrary.search filter.to_s # (|(email=mrhalp@email.org)(uid=mrhalp))
+```ruby
+filter = LDAP::Filter.new(:uid, 'username')
+filter | :email, 'username@domain.foo' # => (|(uid=username)(email=username@domain.foo))
+```
 
-You also don't have to worry about all those nested parentheses.
+## Installation
 
-## Install
-
-    gem install ldap-filter
-
-With Bundler:
+Add this line to your application's Gemfile:
 
     gem 'ldap-filter'
 
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install ldap-filter
+
 ## Usage
 
-More to come soon.
+Setup a filter with a key, defaulting to a presence filter. You can initialize
+a filter with all values you would like to filter for. Construct the filter
+using `:to_s` or `:compile`.
+
+```ruby
+filter = LDAP::Filter.new(:givenName)
+filter.compile # => (givenName=*)
+
+filter = LDAP::Filter.new(:givenName, 'Jon', 'Sara'
+filter.to_s # => (|(givenName=Jon)(givenName=Sara))
+```
+
+You can later add values to the filter after initializing it:
+
+```ruby
+# Add values
+filter << 'Jon'
+filter << 'Sara', 'Ben'
+filter.compile # => (|(givenName=Jon)(givenName=Sara)(givenName=Ben))
+```
+
+Create compound filters that filter against more than one property:
+
+```ruby
+filter | :sn
+filter.to_s # => (|(|(givenName=Jon)(givenName=Sara)(givenName=Ben))(sn=*)
+
+# OR
+filter & :sn, 'Smith'
+filter.to_s # => (&(|(givenName=Jon)(givenName=Sara)(givenName=Ben))(sn=Smith))
+
+# OR
+filter & LDAP::Filter.new(:sn)
+```
+
+To combine similar filters, use `:merge` or `:merge!`. Merging filters combines
+the values for shared keys. Currently only works with filters having one key.
+
+```ruby
+other = LDAP::Filter.new(:giveName, 'James', 'Josh')
+
+combined = filter.merge(other)
+combined.to_s # => (|(givenName=Jon)(givenName=Sara)(givenName=Ben)(givenName=James)(givenName=Josh))
+```
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
